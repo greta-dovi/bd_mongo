@@ -1,0 +1,104 @@
+
+services:
+
+  ### CONFIG SERVERS ###
+  configsvr1:
+    image: mongo
+    command: mongod --configsvr --replSet configReplSet --port 27017
+    ports:
+      - 27017:27017
+    volumes:
+      - config1:/data/db
+
+  configsvr2:
+    image: mongo
+    command: mongod --configsvr --replSet configReplSet --port 27017
+    volumes:
+      - config2:/data/db
+
+  configsvr3:
+    image: mongo
+    command: mongod --configsvr --replSet configReplSet --port 27017
+    volumes:
+      - config3:/data/db
+
+  ### SHARDS
+  shard1_node1:
+    image: mongo
+    command: mongod --shardsvr --replSet shard1ReplSet --port 27001
+    ports:
+      - 27001:27001
+    volumes:
+      - shard1_node1:/data/db
+
+  shard1_node2:
+    image: mongo
+    command: mongod --shardsvr --replSet shard1ReplSet --port 27002
+    ports:
+      - 27002:27002
+    volumes:
+      - shard1_node2:/data/db
+
+  shard1_node3:
+    image: mongo
+    command: mongod --shardsvr --replSet shard1ReplSet --port 27005
+    ports:
+      - 27005:27005
+    volumes:
+      - shard1_node3:/data/db
+
+  shard2_node1:
+    image: mongo
+    command: mongod --shardsvr --replSet shard2ReplSet --port 27003
+    ports:
+      - 27003:27003
+    volumes:
+      - shard2_node1:/data/db
+
+  shard2_node2:
+    image: mongo
+    command: mongod --shardsvr --replSet shard2ReplSet --port 27004
+    ports:
+      - 27004:27004
+    volumes:
+      - shard2_node2:/data/db
+
+  shard2_node3:
+    image: mongo
+    command: mongod --shardsvr --replSet shard2ReplSet --port 27006
+    ports:
+      - 27006:27006
+    volumes:
+      - shard2_node3:/data/db
+
+  ### MONGOS ROUTER ###
+  mongos:
+    image: mongo
+    depends_on:
+      - configsvr1
+      - configsvr2
+      - configsvr3
+      - shard1_node1
+      - shard1_node2
+      - shard1_node3
+      - shard2_node1
+      - shard2_node2
+      - shard2_node3
+
+    command: >
+      bash -c "
+      sleep 10 &&
+      mongos --configdb configReplSet/configsvr1:27017,configsvr2:27017,configsvr3:27017 --bind_ip_all"
+    ports:
+      - 27020:27017
+
+volumes:
+  config1:
+  config2:
+  config3:
+  shard1_node1:
+  shard1_node2:
+  shard1_node3:
+  shard2_node1:
+  shard2_node2:
+  shard2_node3:
