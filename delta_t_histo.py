@@ -28,6 +28,7 @@ def calculate_delta_t(mmsi):
 
 for mmsi in mmsi_lst[0:5]:
     lst = calculate_delta_t(mmsi)
-    plt.hist(lst, range=(min(lst), min(lst)+5))
+    # plt.hist(lst, range=(min(lst), min(lst)+5))
+    plt.hist(lst)
     plt.show()
 
